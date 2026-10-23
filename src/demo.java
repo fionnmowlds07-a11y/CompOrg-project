@@ -34,5 +34,7 @@ public class demo
                               usbInfo.getDeviceNumber(i), vendor, product,
                               usb.vendorName(vendor), usb.deviceName(vendor, product));
         }
+        System.out.println();
+        PciAnalysis.printPciSection(DeviceScanner.scanPci());
     }
 }
