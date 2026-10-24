@@ -5,9 +5,9 @@
  * the results.
  *
  * Build:  javac *.java
- * Run:    java demo        (run it from the folder that contains the ids folder)
+ * Run:    java HardwareInspector        (run it from the folder that contains the ids folder)
  */
-public class demo
+public class HardwareInspector
 {
     public static void main(String[] args) throws Exception
     {
@@ -41,6 +41,12 @@ public class demo
             System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
                               usbInfo.getDeviceNumber(i), vendor, product,
                               usb.vendorName(vendor), usb.deviceName(vendor, product));
+        }
+
+        // Cache information for CPU 0
+        System.out.println("CPU 0 caches: " + cacheInfo.getCount());
+        for (int i = 0; i < cacheInfo.getCount(); i++) {
+            System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
         }
         System.out.println();
         PciAnalysis.printPciSection(DeviceScanner.scanPci());
