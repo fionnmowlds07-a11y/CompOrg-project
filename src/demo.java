@@ -18,11 +18,11 @@ public class demo
 
         double totalUsage = 0;
         for (int i = 0; i < cpuInfo.getCount(); i++) {
-            System.out.println("CPU " + i+1 + " Usage: " + cpuInfo.getUsage(i) + "%");
+            System.out.println("CPU " + i + " Usage: " + cpuInfo.getUsage(i) + "%");
             totalUsage = totalUsage + cpuInfo.getUsage(i);
         }
-        double avgCpuUsage = totalUsage/cpuInfo.getCount();
-        System.out.println("Average CPU Usage: " + avgCpuUsage);
+        double avgCpuUsage = Math.round((totalUsage / cpuInfo.getCount()) * 100.0) / 100.0;
+        System.out.println("Average CPU Usage: " + avgCpuUsage + "%");
 
         idLookup pci = idLookup.pci();
         System.out.println("PCI devices: " + pciInfo.getCount());
