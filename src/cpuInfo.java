@@ -78,8 +78,9 @@ public class cpuInfo
         long deltaIdle = newIdleTime - oldIdleTime;
 
         double usagePercent = 100.0 * (deltaTotal - deltaIdle) / deltaTotal;
+        double rounded = Math.round(usagePercent * 100.0) / 100.0;
 
-        return usagePercent;
+        return rounded;
 
     }
 
