@@ -48,8 +48,8 @@ public class cpuInfo
     public static long getBusy(int core)
     {
         long[] f = fields(core);
-        // user + nice + system + irq + softirq + steal
-        return f == null ? -1 : f[0] + f[1] + f[2] + f[5] + f[6] + f[7];
+        // user + nice + system + idle + iowait + irq + softirq + steal
+        return f == null ? -1 : f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7];
     }
 
     /** Ticks since boot that core number 'core' has spent idle (including waiting for I/O). */
