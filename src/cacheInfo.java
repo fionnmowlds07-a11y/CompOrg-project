@@ -1,10 +1,10 @@
-import java.nio.file.Path;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 // Information about the CPU caches, read from /sys/devices/system/cpu/cpu0/cache.
 // For now, this is a single core (CPU 0) information reader.
 
-class CacheInfo {
+class cacheInfo {
 
     // cpu0 represents the first CPU or logical core, and index0 is the first cache (L1).
     private static final Path CACHEINFO = sysFile.path("/sys/devices/system/cpu/cpu0/cache");
@@ -60,7 +60,7 @@ class CacheInfo {
     // The cache line size is read from the "coherency_line_size" file under each index folder, and it is returned as a long value. 
     // If the line size cannot be read or parsed, it returns -1.
     // The value is usually 64 bytes for modern CPUs, but it can vary depending on the architecture and cache level.
-    
+
     public static long getLineSize(int index) {
         return sysFile.number(CACHEINFO.resolve("index" + index + "/coherency_line_size"));
     }
