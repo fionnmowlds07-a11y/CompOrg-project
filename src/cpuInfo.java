@@ -76,8 +76,6 @@ public class cpuInfo
 
         long deltaTotal = newTotal - oldTotal;
         long deltaIdle = newIdleTime - oldIdleTime;
-        System.out.println("(DEBUG) deltaTotal: " + deltaTotal);
-        System.out.println("(DEBUG) deltaIdle: " + deltaIdle);
 
         double usagePercent = 100.0 * (deltaTotal - deltaIdle) / deltaTotal;
 
