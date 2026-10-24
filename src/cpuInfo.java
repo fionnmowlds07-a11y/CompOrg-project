@@ -1,6 +1,4 @@
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Information about the processor, read from /proc/cpuinfo and /proc/stat.
@@ -59,6 +57,22 @@ public class cpuInfo
     {
         long[] f = fields(core);
         return f == null ? -1 : f[3] + f[4];
+    }
+
+    public static long getUsage(int core) {
+        long oldTotal = getBusy(core);
+        long oldIdleTime = getIdle(core);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return 0;
+        }
+        long newTotal = getBusy(core);
+        long newIdleTime = getIdle(core);
+
+        return 0;
+
     }
 
     /** The numbers from the "cpuN" line of /proc/stat, or null if there is no such core. */
