@@ -59,19 +59,29 @@ public class cpuInfo
         return f == null ? -1 : f[3] + f[4];
     }
 
-    public static long getUsage(int core) {
+    public static long getUsage(int core) { //reads time counters since boot of each CPU core, adds them together, reads again
+        //this only returns for ONE cpu core.
         long oldTotal = getBusy(core);
         long oldIdleTime = getIdle(core);
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return 0;
         }
+
         long newTotal = getBusy(core);
         long newIdleTime = getIdle(core);
 
-        return 0;
+        long deltaTotal = newTotal - oldTotal;
+        long deltaIdle = newIdleTime - oldIdleTime;
+        System.out.println("(DEBUG) deltaTotal: " + deltaTotal);
+        System.out.println("(DEBUG) deltaIdle: " + deltaIdle);
+
+        long usagePercent = 100 * (deltaTotal - deltaIdle) / deltaTotal;
+
+        return usagePercent;
 
     }
 
