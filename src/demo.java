@@ -15,7 +15,8 @@ public class demo
         System.out.println("model:  " + cpuInfo.getModel());
         System.out.println("core 0: busy=" + cpuInfo.getBusy(0) + " idle=" + cpuInfo.getIdle(0));
         System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
-        System.out.println("CPU 0 Usage: " + cpuInfo.getUsage(0));
+        System.out.println("CPU 0 Usage: " + cpuInfo.getUsage(0) + "%");
+        System.out.println("CPU 1 Usage: " + cpuInfo.getUsage(1) + "%");
 
         idLookup pci = idLookup.pci();
         System.out.println("PCI devices: " + pciInfo.getCount());

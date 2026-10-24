@@ -59,7 +59,7 @@ public class cpuInfo
         return f == null ? -1 : f[3] + f[4];
     }
 
-    public static long getUsage(int core) { //reads time counters since boot of each CPU core, adds them together, reads again
+    public static double getUsage(int core) { //reads time counters since boot of each CPU core, adds them together, reads again
         //this only returns for ONE cpu core.
         long oldTotal = getBusy(core);
         long oldIdleTime = getIdle(core);
@@ -79,7 +79,7 @@ public class cpuInfo
         System.out.println("(DEBUG) deltaTotal: " + deltaTotal);
         System.out.println("(DEBUG) deltaIdle: " + deltaIdle);
 
-        long usagePercent = 100 * (deltaTotal - deltaIdle) / deltaTotal;
+        double usagePercent = 100.0 * (deltaTotal - deltaIdle) / deltaTotal;
 
         return usagePercent;
 
