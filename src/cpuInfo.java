@@ -67,7 +67,7 @@ public class cpuInfo
         long[] f = fields(core);
         return f == null ? -1 : f[3] + f[4];
     }
-
+/** OLD getUsage code, deprecated and replaced by getUsages()
     public static double getUsage(int core) { //reads time counters since boot of each CPU core, adds them together
         //this only returns for ONE cpu core.
         long oldTotal = getTotal(core);
@@ -93,6 +93,7 @@ public class cpuInfo
         return rounded;
 
     }
+    **/
 
     /**
       returns the usage of every core after one one-second sampling interval.
