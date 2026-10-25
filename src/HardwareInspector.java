@@ -40,6 +40,7 @@ public class HardwareInspector
         for (int i = 0; i < cacheInfo.getCount(); i++) {
             System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
         }
+        
         System.out.println();
         PciAnalysis.printPciSection(DeviceScanner.scanPci());
     }
