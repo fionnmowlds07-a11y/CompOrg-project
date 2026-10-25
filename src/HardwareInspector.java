@@ -16,6 +16,7 @@ public class HardwareInspector
         System.out.println("core 0: busy=" + cpuInfo.getBusy(0) + " idle=" + cpuInfo.getIdle(0));
         System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
 
+        //CPU usage: for loop for per core, and overall average.
         double totalUsage = 0;
         for (int i = 0; i < cpuInfo.getCount(); i++) {
             System.out.println("CPU " + i + " Usage: " + cpuInfo.getUsage(i) + "%");
