@@ -17,12 +17,14 @@ public class HardwareInspector
         System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
 
         //CPU usage: for loop for per core, and overall average.
+        double[] usages = cpuInfo.getUsages();
         double totalUsage = 0;
-        for (int i = 0; i < cpuInfo.getCount(); i++) {
-            System.out.println("CPU " + i + " Usage: " + cpuInfo.getUsage(i) + "%");
-            totalUsage = totalUsage + cpuInfo.getUsage(i);
+        for (int i = 0; i < usages.length; i++) {
+            double usage = usages[i];
+            System.out.println("CPU " + i + " Usage: " + usage + "%");
+            totalUsage = totalUsage + usage;
         }
-        double avgCpuUsage = Math.round((totalUsage / cpuInfo.getCount()) * 100.0) / 100.0;
+        double avgCpuUsage = Math.round((totalUsage / usages.length) * 100.0) / 100.0;
         System.out.println("Average CPU Usage: " + avgCpuUsage + "%");
 
         idLookup pci = idLookup.pci();
