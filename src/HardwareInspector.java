@@ -35,12 +35,13 @@ public class HardwareInspector
                               usb.vendorName(vendor), usb.deviceName(vendor, product));
         }
 
-        // Cache information for CPU 0
-        System.out.println("CPU 0 caches: " + cacheInfo.getCount());
-        for (int i = 0; i < cacheInfo.getCount(); i++) {
-            System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
-        }
-        
+        // Print cache information
+        System.out.println();
+        System.out.println("==================================================================");
+        System.out.println("Cache Information\n");
+        cacheInfo.printGroupedCacheInfo();
+        System.out.println("==================================================================");
+
         System.out.println();
         PciAnalysis.printPciSection(DeviceScanner.scanPci());
     }
