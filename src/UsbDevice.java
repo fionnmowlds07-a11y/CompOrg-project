@@ -49,5 +49,11 @@ public class UsbDevice
         return String.format("Bus %03d Device %03d: ID %04x:%04x %s %s",
                              busNumber, deviceNumber, vendorId, productId, vendorName, productName);
     }
+
+    // Linux names each root hub's folder "usb" + its bus number (usb1, usb2, ...),
+    // while real devices are named by bus and port (3-5). Root hubs are the
+    // controllers inside the computer, not something plugged in.
+    public boolean isRootHub()     { return name.startsWith("usb"); }
+
 }
 
