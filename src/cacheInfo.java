@@ -14,18 +14,13 @@ class cacheInfo {
                             .resolve("index" + index);
     }
 
-    // counts how many cache levels CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
-    // it returns the number of index folders, which is the number of cache tiers (L1, L2, L3, etc.) for CPU N.
-
+    // counts how many cache entries CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
+    // it returns the number of index folders, which is the number of cache entries (L1, L1, L2, L3, etc.) for CPU N.
 
     public static int getCount(int cpuNumber) {
         int  count = 0;
         while (Files.isDirectory(addCPUandIndex(cpuNumber, count))) {
             count++;    
-        }
-        if (count == 0) {
-            System.out.println("No cache information found for CPU " + cpuNumber + ".");
-            return -1;
         }
         return count;
     }
@@ -91,12 +86,20 @@ class cacheInfo {
     // This method prints the cache information for each CPU, but groups identical CPU cache configurations first.
     // It uses the unique Signatures list to make sure a signature doesn't match an already existing one, before creating a new list of groupedCores.
     // The indexOf() method checks the list for a specific signature and returns -1 if it is not found.
+
     public static void printGroupedCacheInfo() {
+
+        int count = cpuInfo.getCount();
+        
+        if (count == 0) {
+            System.out.println("Cache information is not available");
+            return;
+        }
 
         ArrayList<String> uniqueSignatures = new ArrayList<>();
         ArrayList<ArrayList<Integer>> groupedCores = new ArrayList<>();
 
-        for (int i = 0; i < cpuInfo.getCount(); i++) {
+        for (int i = 0; i < count; i++) {
             String sig = cacheInfo.signature(i);
 
             int index = uniqueSignatures.indexOf(sig);
