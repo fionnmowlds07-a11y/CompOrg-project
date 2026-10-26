@@ -80,9 +80,12 @@ public class PciAnalysis
         Map<String, Integer> classCounts = countByClass(devices);
 
         System.out.println("== PCI SUMMARY ==");
-       	System.out.println("Total: " + devices.size() + " devices (vendor counts add to " + total(vendorCounts) + ", class counts add to " + total(classCounts) + ")");
-        System.out.println("Vendors: " + joinCounts(vendorCounts));
-        System.out.println("Classes: " + joinCounts(classCounts));
+        System.out.println("Total: " + devices.size() + " devices");
+        System.out.println();
+        printCounts("By vendor", vendorCounts);
+        System.out.println();
+        printCounts("By class", classCounts);
+        System.out.println();
 
         List<String> top = mostCommon(classCounts);
         if (top.isEmpty()) {
@@ -107,24 +110,13 @@ public class PciAnalysis
         }
     }
 
-    // Turn counts like {Intel=25, Realtek=1} into "Intel 25, Realtek 1".
-    private static String joinCounts(Map<String, Integer> counts)
+    // Print counts one per line, names lined up on the left and numbers on the right.
+    private static void printCounts(String title, Map<String, Integer> counts)
     {
-        List<String> parts = new ArrayList<>();
+        System.out.println(title + ":");
         for (Map.Entry<String, Integer> e : counts.entrySet()) {
-            parts.add(e.getKey() + " " + e.getValue());
+            System.out.printf("  %-35s %3d%n", e.getKey(), e.getValue());
         }
-        return String.join(", ", parts);
-    }
-
-    // Add up all the counts in a map, e.g. {Intel=25, Realtek=1, Sandisk=1} gives 27.
-    private static int total(Map<String, Integer> counts)
-    {
-        int sum = 0;
-        for (int n : counts.values()) {
-            sum += n;
-        }
-        return sum;
     }
 
 }
