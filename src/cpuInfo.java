@@ -30,7 +30,17 @@ public class cpuInfo
     public static String getModel()
     {
         String model = getField("model name");
-        return model.isEmpty() ? "unknown" : model;
+        if (model.isEmpty()) {
+            String implementer = getField("CPU implementer");
+            String part = getField("CPU part");
+            if (!implementer.isEmpty() || !part.isEmpty()) {
+                return "ARM CPU (implementer: " + implementer + ") - (part: " + part + ")";
+            }
+        }
+        else {
+            return model;
+        }
+        return "Model not available.";
     }
 
     /** The value of the first line in /proc/cpuinfo whose name is exactly 'name', or "". */
