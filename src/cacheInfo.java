@@ -14,8 +14,7 @@ class cacheInfo {
                             .resolve("index" + index);
     }
 
-    // counts how many cache entries CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
-    // it returns the number of index folders, which is the number of cache entries (L1, L1, L2, L3, etc.) for CPU N.
+    // counts how many cache layers CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
 
     public static int getCount(int cpuNumber) {
         int  count = 0;

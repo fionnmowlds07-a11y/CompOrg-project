@@ -41,6 +41,10 @@ public class HardwareInspector
         System.out.println("Cache Information\n");
         cacheInfo.printGroupedCacheInfo();
         System.out.println("==================================================================");
+        
+        // Stride report
+        System.out.println("");
+        MemoryHierarchyExplorer.printStrideReport();
 
         System.out.println();
         PciAnalysis.printPciSection(DeviceScanner.scanPci());
