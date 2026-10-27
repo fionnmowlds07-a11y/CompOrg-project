@@ -17,14 +17,20 @@ public class MemoryReport {
         long total = memInfo.getTotal(); //gets the total memory in KiB from the starter code
         long available = memInfo.getAvailable(); //gets the available memory in KiB from the starter code
         long used = memInfo.getUsed(); //gets the used memory in KiB from the starter code
-        
+
+        System.out.println("== MEMORY ==");
+        if (total <= 0 || available < 0) {
+            // the starter returns -1 when /proc/meminfo can't be read, so there is nothing to work out
+            System.out.println("Memory information not available (/proc/meminfo could not be read).");
+            return;
+        }
+
         double percentUsed = (double) used / total * 100; //calculates the percentage of memory used
 
-        System.out.println("------Memory Report------"); //prints report {
         System.out.println("Total Memory: " + formatBytes(total));
         System.out.println("Used Memory: " + formatBytes(used));
         System.out.println("Available Memory: " + formatBytes(available));
-        System.out.println("Percentage of the Memory Used: " + String.format("%.2f%%", percentUsed)); //}
+        System.out.println("Percentage of the Memory Used: " + String.format("%.2f%%", percentUsed));
 
         long swapTotal = memInfo.field("SwapTotal"); //gets the total swap memory from the starter code
         long swapFree = memInfo.field("SwapFree"); //gets the free swap memory from the starter code
@@ -33,5 +39,8 @@ public class MemoryReport {
             System.out.println("Total Swap Memory: " + formatBytes(swapTotal)); //prints the swap totals
             System.out.println("Used Swap Memory: " + formatBytes(swapUsed));
         }
+
+        System.out.println("In plain English: this machine has " + formatBytes(total) + " of RAM, of which "
+                           + formatBytes(used) + " (" + Math.round(percentUsed) + "%) is in use.");
     }
 }
