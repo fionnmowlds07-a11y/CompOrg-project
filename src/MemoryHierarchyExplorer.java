@@ -122,9 +122,9 @@ class MemoryHierarchyExplorer {
         if (estimate == reported) {
             return "\n\nThe measurement matches.";
         } if (estimate == 2 * reported) {
-            return "\n\nThe measurement is twice the line size. \nA likely cause is that the CPU fetches two neighbouring lines together \n(adjacent-line prefetch, common on Intel chips), \nso the cost keeps rising until reads are two lines apart.";
+            return "\n\nThe measurement is twice the line size. \nA likely cause is that the CPU fetches two neighbouring lines together \n(adjacent-line prefetch), \nso the cost keeps rising until reads are two lines apart.";
         }
-        return "The measurement does not match; repeat the run, since background load adds noise.";
+        return "\n\nThe measurement does not match; repeat the run, since background load adds noise.";
     }
 
     // ------------------------------------------------------
@@ -191,7 +191,7 @@ class MemoryHierarchyExplorer {
     // POINTER CHASE
     // -------------------------------------------------------------------
 
-    // The working-set sizes we test: 4 KiB, 8 KiB, 16 KiB ... up to MAX_SET.
+    // The working-set sizes we test: 4 KiB, 8 KiB, 16 KiB ... up to MAX_WORKING_SET.
     // creates all the different arrays we need of these sizes
     // -------------------------------------------------------------------------------------
 
@@ -331,7 +331,7 @@ class MemoryHierarchyExplorer {
         double [] ns = pointerChase(workingSetBytes);
 
         if (ns.length < 3) {
-            System.out.println("Not enough memory for the test. Try: java -Xmx1g -cp out CacheExplorer");
+            System.out.println("Not enough memory for the test. Try running with more memory: java -Xmx1g HardwareInspector");
             return;
         }
         
@@ -376,15 +376,21 @@ class MemoryHierarchyExplorer {
             }
         }
 
-        System.out.println();
+                System.out.println();
+
+        long largest = workingSetBytes[ns.length - 1];
+
+        // the measured step nearest to each reported cache (-1 if there is nothing to compare)
+        long[] match = new long[r];
+        for (int i = 0; i < r; i++) {
+            match[i] = (reported[i] > largest || measured.length == 0) ? -1 : nearest(measured, reported[i]);
+        }
 
         if (r > 0) {
             System.out.printf("%-6s %12s %12s   %s%n", "Level", "Reported", "Measured", "Result");
         }
-        long largest = workingSetBytes[ns.length - 1];
 
         for (int i = 0; i < r; i++) {
-            String m = "-";
             String result;
 
             if (reported[i] > largest) {
@@ -394,16 +400,41 @@ class MemoryHierarchyExplorer {
                 result = "no step found";
 
             } else {
-                long near = nearest(measured, reported[i]);
-                m = label(near);
-                result = verdict(near, reported[i]);
+                result = verdict(match[i], reported[i]);
+                for (int j = 0; j < r; j++) {            // is the same step also the nearest one for another level?
+                    if (j != i && match[j] == match[i]) {
+                        result = "ambiguous: the same step is nearest to L" + levels[j];
+                    }
+                }
             }
-            System.out.printf("%-6s %12s %12s   %s%n", "L" + levels[i], label(reported[i]), m, result);
+            System.out.printf("%-6s %12s %12s   %s%n", "L" + levels[i], label(reported[i]),
+                              match[i] < 0 ? "-" : label(match[i]), result);
         }
 
         if (r == 0) {
             System.out.println("Reported cache sizes: not available (no cache information)");
         }
+
+        // steps that are not the nearest step of any reported cache
+        if (r > 0) {
+            for (long m : measured) {
+                boolean used = false;
+                for (int i = 0; i < r; i++) {
+                    if (match[i] == m) {
+                        used = true;
+                    }
+                }
+                if (!used) {
+                    System.out.println("Unmatched step at " + label(m) + ": no reported cache is nearest to it. "
+                        + "The machine may have a cache it does not report, or the reported sizes may be wrong.");
+                }
+            }
+        }
+
+        System.out.println();
+        System.out.println("Sizes are tested in powers of two, so each estimate can be off by one doubling.");
+        System.out.println("A cache shared with other programs or virtual machines can behave smaller than reported.");
+        System.out.println("Two caches close in size can produce one combined step, so one step may be nearest to two levels.");
     }
 
     // -------------------------------------------------------------------------------------

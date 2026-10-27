@@ -14,7 +14,7 @@ class cacheInfo {
                             .resolve("index" + index);
     }
 
-    // counts how many cache layers CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
+    // counts how many cache entries CPU N has. This is equal to the number of index folders under /sys/devices/system/cpu/cpuN/cache.
 
     public static int getCount(int cpuNumber) {
         int  count = 0;
@@ -58,7 +58,7 @@ class cacheInfo {
     }
 
     // returns the cache line size of each cache level of CPU N.
-    // The cache line size is read from the "coherency_line_size" file under each index folder, and it is returned as a long value. 
+    // The cache line size is read from the "coherency_line_size" file under each index folder, and it is returned as an int value. 
     // If the line size cannot be read or parsed, it returns -1.
     // The value is usually 64 bytes for modern CPUs, but it can vary depending on the architecture and cache level.
 
@@ -118,6 +118,10 @@ class cacheInfo {
         for (int i = 0; i < uniqueSignatures.size(); i++) {
             String sig = uniqueSignatures.get(i);
             ArrayList<Integer> cores = groupedCores.get(i);
+            if (sig.isEmpty()) {                     // these cores have no cache folder (some virtual machines)
+                System.out.println("Cores " + cores + ": cache information not available");
+                continue;
+            }
             System.out.println("Cores " + cores + " share the following cache configuration:");
             System.out.println(sig);
         }

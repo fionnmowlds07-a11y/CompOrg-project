@@ -1,9 +1,4 @@
 /**
- * A short example that shows how to call each provided class. It prints raw
- * numbers and a few names. It is NOT a solution to the assignment: you still
- * have to measure load, store the devices, sort them, analyse them and present
- * the results.
- *
  * Build:  javac *.java
  * Run:    java HardwareInspector        (run it from the folder that contains the ids folder)
  */
