@@ -5,28 +5,26 @@ import java.util.List;
  * already sorts by bus, then device number), with the root hubs counted
  * separately from the devices that are actually plugged in.
  */
-public class UsbReport
-{
-    public static void printUsbSection(List<UsbDevice> devices)
-    {
-        // A VM or the cloud server may have no USB at all
-        if (devices.isEmpty()) {
+public class UsbReports {
+    public static void printUsbSection(List<UsbDevice> devices) {
+
+        if (devices.isEmpty()) { // checks if theres no devices
             System.out.println("== USB DEVICES (0) ==");
-            System.out.println("No USB devices found (Incase of no devieces on cloud server).");
+            System.out.println("No USB devices found (Incase of no devieces on cloud server)."); // prints result
             return;
         }
 
         int hubs = 0;
         for (UsbDevice d : devices) {
-            if (d.isRootHub()) hubs++;
+            if (d.isRootHub()) // checks if device is a root hub
+                hubs++;
         }
 
         System.out.printf("== USB DEVICES (%d: %d root hubs, %d attached) ==%n",
-                          devices.size(), hubs, devices.size() - hubs);
+                devices.size(), hubs, devices.size() - hubs);
         for (UsbDevice d : devices) {
-            String tag = d.isRootHub() ? "  (root hub)" : "";
+            String tag = d.isRootHub() ? "  (root hub)" : ""; // loops through devices and prints the info
             System.out.println("  " + d + tag);
         }
     }
 }
-
