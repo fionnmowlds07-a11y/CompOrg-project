@@ -27,31 +27,14 @@ public class HardwareInspector
         double avgCpuUsage = Math.round((totalUsage / usages.length) * 100.0) / 100.0;
         System.out.println("Average CPU Usage: " + avgCpuUsage + "%");
 
-        idLookup pci = idLookup.pci();
-        System.out.println("PCI devices: " + pciInfo.getCount());
-        for (int i = 0; i < pciInfo.getCount(); i++) {
-            int vendor = pciInfo.getVendorId(i);
-            int device = pciInfo.getDeviceId(i);
-            System.out.printf("  %s  %04x:%04x  %s %s%n", pciInfo.getAddress(i), vendor, device,
-                              pci.vendorName(vendor), pci.deviceName(vendor, device));
-        }
-
-        idLookup usb = idLookup.usb();
-        System.out.println("USB devices: " + usbInfo.getCount());
-        for (int i = 0; i < usbInfo.getCount(); i++) {
-            int vendor = usbInfo.getVendorId(i);
-            int product = usbInfo.getProductId(i);
-            System.out.printf("  Bus %03d Device %03d: ID %04x:%04x  %s %s%n", usbInfo.getBusNumber(i),
-                              usbInfo.getDeviceNumber(i), vendor, product,
-                              usb.vendorName(vendor), usb.deviceName(vendor, product));
-        }
-
         // Cache information for CPU 0
         System.out.println("CPU 0 caches: " + cacheInfo.getCount());
         for (int i = 0; i < cacheInfo.getCount(); i++) {
             System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
         }
         System.out.println();
-        PciAnalysis.printPciSection(DeviceScanner.scanPci());
+        PciAnalysis.printPciSection(DeviceScanner.scanPci());   // Fionn: PCI, sorted two ways + summary
+        System.out.println();
+        UsbReport.printUsbSection(DeviceScanner.scanUsb());     // Joseph: USB, root hubs labelled
     }
 }
