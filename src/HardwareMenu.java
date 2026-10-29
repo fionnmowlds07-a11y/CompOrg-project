@@ -30,9 +30,8 @@ public class HardwareMenu {
                 case 1:
                     choice = 0;
 
-                    System.out.println("cores:  " + cpuInfo.getCount());
-                    System.out.println("model:  " + cpuInfo.getModel());
-                    System.out.println("core 0: busy=" + cpuInfo.getBusy(0) + " idle=" + cpuInfo.getIdle(0));
+                    System.out.println("CPU cores:  " + cpuInfo.getCount());
+                    System.out.println("CPU model:  " + cpuInfo.getModel());
 
                     //CPU usage: for loop for per core, and overall average.
                     double[] usages = cpuInfo.getUsages();
@@ -67,7 +66,6 @@ public class HardwareMenu {
 
                 case 2:
                     choice = 0;
-                    System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
                     MemoryReport.report();
                     System.out.println("Enter E to exit:");
                     while (!Scan.nextLine().equalsIgnoreCase("e")) {

@@ -81,7 +81,7 @@ public class cpuInfo
     /**
       returns the usage of every core after one one-second sampling interval.
       both snapshots are taken for all cores before calculating any usage.
-      returns all usages in a double[]
+      returns all usages in a double[] array
      */
     public static double[] getUsages()
     {
