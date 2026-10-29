@@ -69,7 +69,6 @@ public class cpuInfo
         return f == null ? -1 : f[0] + f[1] + f[2] + f[3] + f[4] + f[5] + f[6] + f[7];
     }
 
-    
 
     /** Ticks since boot that core number 'core' has spent idle (including waiting for I/O). */
     public static long getIdle(int core)
@@ -77,33 +76,7 @@ public class cpuInfo
         long[] f = fields(core);
         return f == null ? -1 : f[3] + f[4];
     }
-/** OLD getUsage code, deprecated and replaced by getUsages()
-    public static double getUsage(int core) { //reads time counters since boot of each CPU core, adds them together
-        //this only returns for ONE cpu core.
-        long oldTotal = getTotal(core);
-        long oldIdleTime = getIdle(core);
 
-        //waits one second between old and new reading
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return 0;
-        }
-
-        long newTotal = getTotal(core);
-        long newIdleTime = getIdle(core);
-
-        long deltaTotal = newTotal - oldTotal;
-        long deltaIdle = newIdleTime - oldIdleTime;
-
-        double usagePercent = 100.0 * (deltaTotal - deltaIdle) / deltaTotal;
-        double rounded = Math.round(usagePercent * 100.0) / 100.0;
-
-        return rounded;
-
-    }
-    **/
 
     /**
       returns the usage of every core after one one-second sampling interval.
@@ -158,3 +131,32 @@ public class cpuInfo
         return null;
     }
 }
+
+
+/** OLD getUsage code, deprecated and replaced by getUsages()
+    public static double getUsage(int core) { //reads time counters since boot of each CPU core, adds them together
+        //this only returns for ONE cpu core.
+        long oldTotal = getTotal(core);
+        long oldIdleTime = getIdle(core);
+
+        //waits one second between old and new reading
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return 0;
+        }
+
+        long newTotal = getTotal(core);
+        long newIdleTime = getIdle(core);
+
+        long deltaTotal = newTotal - oldTotal;
+        long deltaIdle = newIdleTime - oldIdleTime;
+
+        double usagePercent = 100.0 * (deltaTotal - deltaIdle) / deltaTotal;
+        double rounded = Math.round(usagePercent * 100.0) / 100.0;
+
+        return rounded;
+
+    }
+    **/
