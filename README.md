@@ -50,3 +50,7 @@ Lets you pick one section at a time. Type a number and press Enter; type `E` to 
 ```
 
 ![HardwareMenu](screenshots%20for%20ReadMe/Harware%20inspector%20menu.png)
+
+## AI declaration
+
+We used AI tools to help write the CSS styling in the HTML report (`src/HtmlExport.java`) and to learn how to structure and format HTML. All other code was written by the team.
