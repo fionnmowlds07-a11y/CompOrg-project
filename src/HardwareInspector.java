@@ -9,10 +9,8 @@ public class HardwareInspector
 {
     public static void main(String[] args) throws Exception
     {
-        System.out.println("cores:  " + cpuInfo.getCount());
-        System.out.println("model:  " + cpuInfo.getModel());
-        System.out.println("core 0: busy=" + cpuInfo.getBusy(0) + " idle=" + cpuInfo.getIdle(0));
-        System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
+        System.out.println("CPU model:  " + cpuInfo.getModel());
+        System.out.println("CPU cores:  " + cpuInfo.getCount());
 
         //CPU usage: for loop for per core, and overall average.
         double[] usages = cpuInfo.getUsages();
