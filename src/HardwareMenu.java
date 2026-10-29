@@ -46,10 +46,18 @@ public class HardwareMenu {
                     System.out.println("Average CPU Usage: " + avgCpuUsage + "%");
 
                     // Cache information for CPU 0
-                    System.out.println("CPU 0 caches: " + cacheInfo.getCount());
-                    for (int i = 0; i < cacheInfo.getCount(); i++) {
-                        System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
-                    }
+                    // Print cache information
+                    System.out.println();
+                    System.out.println("==================================================================");
+                    System.out.println("Cache Information\n");
+                    cacheInfo.printGroupedCacheInfo();
+                    System.out.println("==================================================================");
+                    
+                    // Stride Report and Pointer Chase
+                    System.out.println("");
+                    MemoryHierarchyExplorer.printStrideReport();
+                    System.out.println("");
+                    MemoryHierarchyExplorer.printCacheSizeReport();
 
                     System.out.println("Enter E to exit:");
                     while (!Scan.nextLine().equalsIgnoreCase("e")) {
@@ -60,6 +68,7 @@ public class HardwareMenu {
                 case 2:
                     choice = 0;
                     System.out.println("memory: total=" + memInfo.getTotal() + " KiB, used=" + memInfo.getUsed() + " KiB");
+                    MemoryReport.report();
                     System.out.println("Enter E to exit:");
                     while (!Scan.nextLine().equalsIgnoreCase("e")) {
                         System.out.println("Invalid input. Enter E:");
