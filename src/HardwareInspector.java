@@ -1,6 +1,9 @@
+import java.util.List;
+
 /**
  * Build:  javac *.java
  * Run:    java HardwareInspector        (run it from the folder that contains the ids folder)
+ *         java HardwareInspector --html (also saves the results as report.html)
  */
 public class HardwareInspector
 {
@@ -34,8 +37,18 @@ public class HardwareInspector
         MemoryHierarchyExplorer.printCacheSizeReport();
 
         System.out.println();
-        PciAnalysis.printPciSection(DeviceScanner.scanPci());   // Fionn: PCI, sorted two ways + summary
+        List<PciDevice> pci = DeviceScanner.scanPci();
+        List<UsbDevice> usb = DeviceScanner.scanUsb();
+        PciAnalysis.printPciSection(pci);   // Fionn: PCI, sorted two ways + summary
         System.out.println();
-        UsbReports.printUsbSection(DeviceScanner.scanUsb());     // Joseph: USB, root hubs labelled
+        UsbReports.printUsbSection(usb);     // Joseph: USB, root hubs labelled
+        System.out.println();
+        MemoryReport.report(); // Joseph: Memory Report
+
+        // Extension: with --html, also save everything above as a web page
+        if (args.length > 0 && args[0].equals("--html")) {
+            System.out.println();
+            HtmlExport.write("report.html", usages, pci, usb);
+        }
     }
 }
