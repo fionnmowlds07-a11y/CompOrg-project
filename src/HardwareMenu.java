@@ -91,5 +91,6 @@ public class HardwareMenu {
             }
 
         } while (menu);
+        Scan.close();
     }
 }
