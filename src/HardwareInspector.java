@@ -39,5 +39,7 @@ public class HardwareInspector
         PciAnalysis.printPciSection(DeviceScanner.scanPci());   // Fionn: PCI, sorted two ways + summary
         System.out.println();
         UsbReports.printUsbSection(DeviceScanner.scanUsb());     // Joseph: USB, root hubs labelled
+        System.out.println();
+        MemoryReport.report(); // Joseph: Memory Report
     }
 }
