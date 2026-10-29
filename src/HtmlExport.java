@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Extension: writes the same results as the text report into one HTML page.
- * Each section is built as a String, the sections are joined into one long String,
- * and that is saved to a file. Open the file in any web browser.
+ * Extension: saves everything the program finds as one web page (report.html).
+ *
+ * How it works:
+ *   - every section of the page has its own method that returns a String of HTML
+ *   - write() glues all the Strings together and saves them to a file
+ *   - open the file in any web browser to see it
  */
 public class HtmlExport
 {
-    // All the styling for the page. Kept in one place so the Java below stays about the data. AI was used for this styling.
+    // The look of the page (colours, boxes, tables). AI was used for this styling.
     private static final String STYLE = """
         :root { --bg:#f4f6fb; --card:#ffffff; --text:#1d2433; --muted:#6b7385; --line:#e3e7ef;
                 --accent:#3b6cf6; --ok:#2fa36b; --warn:#e0a020; --high:#d9534f; }
@@ -25,7 +28,11 @@ public class HtmlExport
         main { max-width:1000px; margin:0 auto; padding:32px 16px; }
         h1 { margin:0; font-size:28px; }
         h2 { margin:0 0 16px; font-size:18px; }
-        .sub { color:var(--muted); margin:4px 0 24px; }
+        h3 { margin:16px 0 8px; font-size:15px; }
+        .sub { color:var(--muted); margin:4px 0 16px; }
+        nav { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px; }
+        nav a { color:var(--accent); text-decoration:none; border:1px solid var(--line);
+                background:var(--card); border-radius:20px; padding:4px 12px; font-size:13px; }
         .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
                 padding:20px; margin-bottom:20px; overflow-x:auto; }
         .stats { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-bottom:16px; }
@@ -39,14 +46,15 @@ public class HtmlExport
         td { border-bottom:1px solid var(--line); padding:8px; vertical-align:middle; }
         .mono { font-family: ui-monospace, Consolas, monospace; }
         .tag { background:var(--accent); color:white; border-radius:20px; padding:2px 8px; font-size:12px; }
+        .note { color:var(--muted); font-size:13px; margin:12px 0 0; }
         """;
 
-    /** Build the page and save it as fileName. usages are the per-core CPU loads main already measured. */
+    /** Build the whole page and save it as fileName. */
     public static void write(String fileName, double[] usages, List<PciDevice> pci, List<UsbDevice> usb)
     {
         String html = "";
 
-        // The top of the page: title and styling
+        // Top of the page
         html = html + "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n";
         html = html + "<meta charset=\"utf-8\">\n";
         html = html + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
@@ -57,14 +65,23 @@ public class HtmlExport
         html = html + "<h1>Hardware Report</h1>\n";
         html = html + "<p class=\"sub\">Generated " + java.time.LocalDateTime.now().withNano(0) + "</p>\n";
 
-        // One section after another, each one built by its own method
+        // Links that jump to each section
+        html = html + "<nav>";
+        html = html + "<a href=\"#cpu\">Processor</a>";
+        html = html + "<a href=\"#memory\">Memory</a>";
+        html = html + "<a href=\"#caches\">Caches</a>";
+        html = html + "<a href=\"#pci\">PCI</a>";
+        html = html + "<a href=\"#usb\">USB</a>";
+        html = html + "</nav>\n";
+
+        // Each section, one after another
         html = html + cpuSection(usages);
         html = html + memorySection();
         html = html + cacheSection();
         html = html + pciSection(pci);
         html = html + usbSection(usb);
 
-        // The bottom of the page
+        // Bottom of the page
         html = html + "</main>\n</body>\n</html>\n";
 
         try {
@@ -75,9 +92,12 @@ public class HtmlExport
         }
     }
 
-    // Processor: model, core count, average load, then one bar per core.
+    // ---------------------------------------------------------------
+    // PROCESSOR: model, number of cores, average load, a bar per core
+    // ---------------------------------------------------------------
     private static String cpuSection(double[] usages)
     {
+        // Add up every core's load to get the average
         double total = 0;
         for (int i = 0; i < usages.length; i++) {
             total = total + usages[i];
@@ -87,7 +107,7 @@ public class HtmlExport
             average = total / usages.length;
         }
 
-        String html = "<section class=\"card\">\n<h2>Processor</h2>\n";
+        String html = "<section class=\"card\" id=\"cpu\">\n<h2>Processor</h2>\n";
         html = html + "<div class=\"stats\">\n";
         html = html + stat(escape(cpuInfo.getModel()), "Model");
         html = html + stat("" + cpuInfo.getCount(), "Cores");
@@ -99,21 +119,25 @@ public class HtmlExport
             html = html + "<tr>";
             html = html + "<td>CPU " + i + "</td>";
             html = html + "<td>" + String.format("%.1f%%", usages[i]) + "</td>";
-            html = html + "<td>" + bar(usages[i]) + "</td>";
+            html = html + "<td>" + loadBar(usages[i]) + "</td>";
             html = html + "</tr>\n";
         }
         html = html + "</table>\n</section>\n";
         return html;
     }
 
-    // Memory: total, used, available and a bar showing how full it is.
+    // ---------------------------------------------------------------
+    // MEMORY: total, used, available, swap, and a bar of how full it is
+    // ---------------------------------------------------------------
     private static String memorySection()
     {
-        long total = memInfo.getTotal();
+        long total = memInfo.getTotal();          // all in KiB
         long used = memInfo.getUsed();
         long available = memInfo.getAvailable();
 
-        String html = "<section class=\"card\">\n<h2>Memory</h2>\n";
+        String html = "<section class=\"card\" id=\"memory\">\n<h2>Memory</h2>\n";
+
+        // -1 means /proc/meminfo could not be read
         if (total <= 0 || available < 0) {
             html = html + "<p>Memory information not available (/proc/meminfo could not be read).</p>\n</section>\n";
             return html;
@@ -125,35 +149,90 @@ public class HtmlExport
         html = html + stat(MemoryReport.formatBytes(used), "Used");
         html = html + stat(MemoryReport.formatBytes(available), "Available");
         html = html + stat(String.format("%.1f%%", percent), "In use");
+
+        // Swap is only shown if the machine has some
+        long swapTotal = memInfo.field("SwapTotal");
+        long swapFree = memInfo.field("SwapFree");
+        if (swapTotal > 0) {
+            html = html + stat(MemoryReport.formatBytes(swapTotal), "Swap total");
+            html = html + stat(MemoryReport.formatBytes(swapTotal - swapFree), "Swap used");
+        }
         html = html + "</div>\n";
-        html = html + bar(percent);
+
+        html = html + loadBar(percent);
+        html = html + "<p class=\"note\">This machine has " + MemoryReport.formatBytes(total) + " of RAM, of which "
+                    + MemoryReport.formatBytes(used) + " (" + Math.round(percent) + "%) is in use.</p>\n";
         html = html + "</section>\n";
         return html;
     }
 
-    // Caches of CPU 0, one row per cache.
+    // ---------------------------------------------------------------
+    // CACHES: cores with the same caches are grouped together,
+    // the same way cacheInfo.printGroupedCacheInfo() does it
+    // ---------------------------------------------------------------
     private static String cacheSection()
     {
-        String html = "<section class=\"card\">\n<h2>CPU 0 caches</h2>\n";
-        html = html + "<table>\n<tr><th>Level</th><th>Type</th><th>Size</th><th>Line size</th></tr>\n";
-        for (int i = 0; i < cacheInfo.getCount(); i++) {
-            html = html + "<tr>";
-            html = html + "<td>L" + cacheInfo.getLevel(i) + "</td>";
-            html = html + "<td>" + escape(cacheInfo.getType(i)) + "</td>";
-            html = html + "<td>" + MemoryReport.formatBytes(cacheInfo.getSize(i) / 1024) + "</td>";   // size is in bytes, formatBytes wants KiB
-            html = html + "<td>" + cacheInfo.getLineSize(i) + " bytes</td>";
-            html = html + "</tr>\n";
+        String html = "<section class=\"card\" id=\"caches\">\n<h2>Caches</h2>\n";
+
+        int cores = cpuInfo.getCount();
+        if (cores == 0) {
+            html = html + "<p>Cache information is not available.</p>\n</section>\n";
+            return html;
         }
-        html = html + "</table>\n</section>\n";
+
+        // Two cores with the same signature have the same caches.
+        // signatures holds each different signature once, groups holds the cores that have it.
+        ArrayList<String> signatures = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+
+        for (int cpu = 0; cpu < cores; cpu++) {
+            String sig = cacheInfo.signature(cpu);
+            int place = signatures.indexOf(sig);   // -1 means we have not seen it yet
+            if (place == -1) {
+                signatures.add(sig);
+                ArrayList<Integer> newGroup = new ArrayList<>();
+                newGroup.add(cpu);
+                groups.add(newGroup);
+            } else {
+                groups.get(place).add(cpu);
+            }
+        }
+
+        // One small table per group. The first core of the group is used for the numbers.
+        for (int g = 0; g < groups.size(); g++) {
+            ArrayList<Integer> group = groups.get(g);
+            int cpu = group.get(0);
+
+            html = html + "<h3>Cores " + group + "</h3>\n";
+
+            if (cacheInfo.getCount(cpu) == 0) {
+                html = html + "<p>No cache information for these cores (common on virtual machines).</p>\n";
+                continue;
+            }
+
+            html = html + "<table>\n<tr><th>Level</th><th>Type</th><th>Size</th><th>Line size</th></tr>\n";
+            for (int i = 0; i < cacheInfo.getCount(cpu); i++) {
+                html = html + "<tr>";
+                html = html + "<td>L" + cacheInfo.getLevel(cpu, i) + "</td>";
+                html = html + "<td>" + escape(cacheInfo.getType(cpu, i)) + "</td>";
+                html = html + "<td>" + bytesText(cacheInfo.getSize(cpu, i)) + "</td>";
+                html = html + "<td>" + cacheInfo.getLineSize(cpu, i) + " bytes</td>";
+                html = html + "</tr>\n";
+            }
+            html = html + "</table>\n";
+        }
+        html = html + "</section>\n";
         return html;
     }
 
-    // PCI: the device table sorted by address, then how many devices each vendor and class has.
+    // ---------------------------------------------------------------
+    // PCI: every device sorted by address, then counts by vendor and class
+    // ---------------------------------------------------------------
     private static String pciSection(List<PciDevice> devices)
     {
         List<PciDevice> sorted = PciAnalysis.sortByAddress(devices);
 
-        String html = "<section class=\"card\">\n<h2>PCI devices (" + devices.size() + ")</h2>\n";
+        String html = "<section class=\"card\" id=\"pci\">\n<h2>PCI devices (" + devices.size() + ")</h2>\n";
         html = html + "<table>\n<tr><th>Address</th><th>ID</th><th>Class</th><th>Vendor</th><th>Device</th></tr>\n";
         for (int i = 0; i < sorted.size(); i++) {
             PciDevice d = sorted.get(i);
@@ -172,10 +251,9 @@ public class HtmlExport
         return html;
     }
 
-    // One table of name / count, with a bar showing each count's share of the total.
+    // A table of name / count, with a bar showing each count's share of the total
     private static String countSection(String title, Map<String, Integer> counts, int total)
     {
-        // Copy the names into a list so we can loop over them by number
         List<String> names = new ArrayList<>(counts.keySet());
 
         String html = "<section class=\"card\">\n<h2>" + title + "</h2>\n";
@@ -183,18 +261,19 @@ public class HtmlExport
         for (int i = 0; i < names.size(); i++) {
             String name = names.get(i);
             int count = counts.get(name);
-            double share = 100.0 * count / total;
             html = html + "<tr>";
             html = html + "<td>" + escape(name) + "</td>";
             html = html + "<td>" + count + "</td>";
-            html = html + "<td>" + plainBar(share) + "</td>";
+            html = html + "<td>" + plainBar(100.0 * count / total) + "</td>";
             html = html + "</tr>\n";
         }
         html = html + "</table>\n</section>\n";
         return html;
     }
 
-    // USB: every device, with root hubs labelled.
+    // ---------------------------------------------------------------
+    // USB: every device, with root hubs labelled
+    // ---------------------------------------------------------------
     private static String usbSection(List<UsbDevice> devices)
     {
         int hubs = 0;
@@ -205,7 +284,7 @@ public class HtmlExport
         }
         int attached = devices.size() - hubs;
 
-        String html = "<section class=\"card\">\n<h2>USB devices (" + devices.size() + ": "
+        String html = "<section class=\"card\" id=\"usb\">\n<h2>USB devices (" + devices.size() + ": "
                       + hubs + " root hubs, " + attached + " attached)</h2>\n";
         if (devices.isEmpty()) {
             html = html + "<p>No USB devices found.</p>\n</section>\n";
@@ -231,36 +310,56 @@ public class HtmlExport
         return html;
     }
 
-    // A small box with a big value and a label underneath, e.g. "8" / "Cores".
+    // ---------------------------------------------------------------
+    // Small helpers used by the sections above
+    // ---------------------------------------------------------------
+
+    // A box with a big value and a label under it, e.g. "8" / "Cores"
     private static String stat(String value, String label)
     {
         return "<div class=\"stat\"><b>" + value + "</b><span>" + label + "</span></div>\n";
     }
 
-    // A load bar: green under 50%, amber under 80%, red above that.
-    private static String bar(double percent)
+    // A load bar: green under 50%, amber under 80%, red above that
+    private static String loadBar(double percent)
     {
-        String colour;
-        if (percent < 50) {
-            colour = "var(--ok)";
-        } else if (percent < 80) {
-            colour = "var(--warn)";
-        } else {
+        String colour = "var(--ok)";
+        if (percent >= 80) {
             colour = "var(--high)";
+        } else if (percent >= 50) {
+            colour = "var(--warn)";
         }
-        if (percent > 100) {
-            percent = 100;   // never draw a bar wider than its box
-        }
-        return "<div class=\"bar\"><div style=\"width:" + percent + "%; background:" + colour + "\"></div></div>\n";
+        return bar(percent, colour);
     }
 
-    // A bar in the accent colour, for counts where high is not "bad".
+    // A blue bar, for numbers where high is not "bad"
     private static String plainBar(double percent)
     {
-        return "<div class=\"bar\"><div style=\"width:" + percent + "%; background:var(--accent)\"></div></div>";
+        return bar(percent, "var(--accent)");
     }
 
-    // Device names can contain characters that mean something in HTML (& < >), so swap them for safe codes.
+    // Draws the bar itself. Kept between 0 and 100 so it never spills out of its box.
+    private static String bar(double percent, String colour)
+    {
+        if (percent > 100) {
+            percent = 100;
+        }
+        if (percent < 0) {
+            percent = 0;
+        }
+        return "<div class=\"bar\"><div style=\"width:" + String.format("%.1f", percent) + "%; background:" + colour + "\"></div></div>";
+    }
+
+    // Cache sizes come in bytes, but formatBytes wants KiB. -1 means it could not be read.
+    private static String bytesText(long bytes)
+    {
+        if (bytes < 0) {
+            return "unknown";
+        }
+        return MemoryReport.formatBytes(bytes / 1024);
+    }
+
+    // Names can contain & < > which mean something in HTML, so swap them for safe codes
     private static String escape(String text)
     {
         text = text.replace("&", "&amp;");
