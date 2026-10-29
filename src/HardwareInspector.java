@@ -1,3 +1,5 @@
+import java.util.List;
+
 /**
  * A short example that shows how to call each provided class. It prints raw
  * numbers and a few names. It is NOT a solution to the assignment: you still
@@ -6,6 +8,7 @@
  *
  * Build:  javac *.java
  * Run:    java HardwareInspector        (run it from the folder that contains the ids folder)
+ *         java HardwareInspector --html (also saves the results as report.html)
  */
 public class HardwareInspector
 {
@@ -33,8 +36,16 @@ public class HardwareInspector
             System.out.println(cacheInfo.getLevel(i) + " - " + cacheInfo.getType(i) + " cache, size: " + cacheInfo.getSize(i) + " bytes, line size: " + cacheInfo.getLineSize(i) + " bytes");
         }
         System.out.println();
-        PciAnalysis.printPciSection(DeviceScanner.scanPci());   // Fionn: PCI, sorted two ways + summary
+        List<PciDevice> pci = DeviceScanner.scanPci();
+        List<UsbDevice> usb = DeviceScanner.scanUsb();
+        PciAnalysis.printPciSection(pci);   // Fionn: PCI, sorted two ways + summary
         System.out.println();
-        UsbReports.printUsbSection(DeviceScanner.scanUsb());     // Joseph: USB, root hubs labelled
+        UsbReports.printUsbSection(usb);     // Joseph: USB, root hubs labelled
+
+        // Extension: with --html, also save everything above as a web page
+        if (args.length > 0 && args[0].equals("--html")) {
+            System.out.println();
+            HtmlExport.write("report.html", usages, pci, usb);
+        }
     }
 }
